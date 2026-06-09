@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git add:*) Bash(git status:*) Bash(git diff:*) Bash(git commit:*) Bash(git log:*) Bash(git branch:*) Read Glob
+allowed-tools: "Bash(git add:*) Bash(git status:*) Bash(git diff:*) Bash(git commit:*) Bash(git log:*) Bash(git branch:*) Read Glob"
 description: 自動偵測變更並參照專案 commit 規範發出 commit。優先讀取 CLAUDE.md 或 docs/commit-convention.md 的規範，若找不到則套用預設 Conventional Commits 格式。觸發時機：當使用者說「幫我 commit」、「發 commit」、「提交」、「git commit」、「存一個版本」、「幫我存檔」、「把這個 commit 起來」、「push 之前先 commit」，或任何需要建立 git commit 的情境時自動觸發，不需使用者手動輸入 /smart-commit。
 disable-model-invocation: true
 ---
