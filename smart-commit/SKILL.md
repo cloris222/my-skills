@@ -1,6 +1,6 @@
 ---
 name: smart-commit
-allowed-tools: "Bash(git add:*) Bash(git status:*) Bash(git diff:*) Bash(git commit:*) Bash(git log:*) Bash(git branch:*) Read Glob"
+allowed-tools: "Bash(git add:*) Bash(git status:*) Bash(git diff:*) Bash(git commit:*) Bash(git log:*) Bash(git branch:*) Bash(openspec:*) Read Glob"
 description: 自動偵測變更並參照專案 commit 規範發出 commit。優先讀取 CLAUDE.md 或 docs/commit-convention.md 的規範，若找不到則套用預設 Conventional Commits 格式。觸發時機：當使用者說「幫我 commit」、「發 commit」、「提交」、「git commit」、「存一個版本」、「幫我存檔」、「把這個 commit 起來」、「push 之前先 commit」，或任何需要建立 git commit 的情境時自動觸發，不需使用者手動輸入 /smart-commit。
 disable-model-invocation: true
 ---
@@ -41,7 +41,33 @@ disable-model-invocation: true
 
 ---
 
-## Stage 1：偵測 Commit 規範
+## Stage 1：OpenSpec 歸檔（commit 前）
+
+Code review 通過（或問題全數修正）後、進入提交流程前，先處理未歸檔的 spec change：
+
+1. 執行 `openspec list` 檢查是否有 active change
+   - **無 active change** → 直接進入 Stage 2
+2. 對每個 active change 檢查 `openspec/changes/<id>/tasks.md`：
+   - **任務全部完成（無 `- [ ]`）** → 依序執行：
+     1. `openspec validate <id> --strict` 確認通過
+     2. `openspec archive <id> --yes` 歸檔（**禁止使用 `--skip-specs`**，spec delta 必須合併回主 spec）
+     3. 歸檔產生的變更（主 spec 更新＋目錄搬移）一併納入本次 commit
+   - **有未完成任務** → 列出未完成項目，詢問使用者：
+
+     ```
+     change「<id>」尚有 X 個未完成任務：
+     （列出未完成項目）
+
+     1. 先完成任務再提交 — 中止流程，完成後重新執行 /smart-commit
+     2. 保留 change 不歸檔，繼續提交 — 該 change 留待日後處理
+     3. 取消 — 中止本次提交流程
+     ```
+
+3. 歸檔完成後執行 `openspec validate --specs --strict`，確認主 spec 全數有效後進入 Stage 2
+
+---
+
+## Stage 2：偵測 Commit 規範
 
 依以下優先順序尋找規範：
 
@@ -71,9 +97,9 @@ disable-model-invocation: true
 
 ---
 
-## Stage 2：分析變更內容
+## Stage 3：分析變更內容
 
-根據 `git diff HEAD` 與 `git status` 的輸出，理解：
+根據 `git diff HEAD` 與 `git status` 的輸出（含 Stage 1 歸檔產生的變更），理解：
 
 - 哪些檔案被新增、修改、刪除
 - 變更的核心目的（功能、修復、重構…）
@@ -81,9 +107,9 @@ disable-model-invocation: true
 
 ---
 
-## Stage 3：套用規範產生 commit 訊息
+## Stage 4：套用規範產生 commit 訊息
 
-根據 Stage 1 找到的規範（專案規範或預設規範），產生最符合的 commit 訊息：
+根據 Stage 2 找到的規範（專案規範或預設規範），產生最符合的 commit 訊息：
 
 - 主旨簡述本次變更，**不超過 15 字**（中文字符計算）
 - 使用繁體中文描述（若專案規範未強制英文）
@@ -91,7 +117,7 @@ disable-model-invocation: true
 
 ---
 
-## Stage 4：執行 commit
+## Stage 5：執行 commit
 
 1. 若有 unstaged 的相關變更，先執行 `git add` 將其加入 staging
 2. 使用 `git commit -m` 發出 commit
@@ -107,6 +133,7 @@ disable-model-invocation: true
 ✅ Commit 完成
 
 Code Review：[通過 / 有輕微問題 / 已確認忽略問題]
+OpenSpec 歸檔：[無待歸檔 change / 已歸檔 <id> / 使用者選擇保留]
 Commit hash：（提交後顯示）
 變更檔案數：
 Commit 訊息：
