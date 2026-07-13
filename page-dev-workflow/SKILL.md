@@ -1,6 +1,6 @@
 ---
 name: page-dev-workflow
-description: 手動呼叫專用，不自動觸發。整合 openspec、spec 討論、superpowers TDD 規劃的頁面開發標準工作流程。僅在使用者明確以 /page-dev-workflow 呼叫時啟動。
+description: 整合 openspec、spec 討論、superpowers TDD 規劃的頁面開發標準工作流程。觸發時機：使用者提出「要求實際動工」的開發需求時自動觸發，例如「開發」、「幫我做一個功能」、「新增...功能」、「加一個頁面」、「做一個新頁面」、「修正頁面」、「加入...邏輯」、「幫我加上」、「實作...」、「建立...頁面/功能」等；若使用者只是要分析、比較、找 bug 原因、或詢問建議（尚未要求動工，例如「我想知道」「請問」「確認是否」「評估」「分析」開頭的訊息），不觸發此 skill，改依 CLAUDE.md 程式碼修改原則僅提供報告與建議。也可用 /page-dev-workflow 手動呼叫。
 metadata:
     github-path: page-dev-workflow
     github-ref: refs/heads/main
@@ -11,9 +11,9 @@ metadata:
 
 整合 openspec、spec 討論、superpowers 規劃，以 TDD 模式驅動頁面開發的完整流程。
 
-**此 skill 手動呼叫專用**，請勿在對話途中自動啟動。
+**此 skill 可依上方 description 的觸發時機自動啟動，亦可用 `/page-dev-workflow` 手動呼叫。** 判斷觸發與否時，優先確認使用者是否已明確要求動工（而非僅要求分析或建議）。
 
-> **依賴 skills**：`openspec`、`superpowers:writing-plans`、`superpowers:test-driven-development`、`smart-commit`
+> **依賴 skills**：`openspec`、`grilling`（grill-me 規格壓力測試）、`superpowers:writing-plans`、`superpowers:test-driven-development`、`smart-commit`
 
 ---
 
@@ -57,9 +57,21 @@ metadata:
 2. **UI 截圖或設計稿**：是否有視覺參考？
 3. **功能說明**：用自己的話描述這個功能或修改的目的與預期行為
 
-根據收集到的素材，與使用者討論，逐步完善 spec 文件（`proposal.md`、`tasks.md`，必要時補充 `design.md`）。
+根據收集到的素材，草擬 spec 文件（`proposal.md`、`tasks.md`，必要時補充 `design.md`）。
 
-> **重要**：等待使用者明確表示「spec 確認完成」後才進入下一步，不可自行假設 spec 已完成。
+### 步驟四之一：grilling 規格壓力測試訪談
+
+spec 草稿完成後，詢問使用者：
+
+> spec 草稿已完成。是否進行 grilling 規格壓力測試訪談？我會針對規格的每個決策分支逐一提問（一次一題、附建議答案），直到雙方對規格達成共識。建議新頁面與較大的功能變更執行；小型修正可跳過。
+
+- **執行** → 呼叫 `grilling` skill 進行訪談，並遵守以下回寫規則：
+  - 訪談中每確認一項決策，隨即回寫至 `proposal.md`（行為與範圍）或 `design.md`（技術取捨），不可等訪談全部結束才憑記憶補寫
+  - 可從 codebase 或 `docs/api.json` 查證的「事實」自行查證，不拿來問使用者；「決策」才逐題交由使用者定奪
+  - 訪談結束後向使用者摘要本次訪談新增／修改的 spec 內容
+- **跳過** → 直接與使用者討論完善 spec
+
+> **重要**：無論是否執行 grilling，皆須等待使用者明確表示「spec 確認完成」後才進入下一步，不可自行假設 spec 已完成。
 
 ---
 
@@ -85,11 +97,21 @@ metadata:
 
 ---
 
-## 步驟六：退場
+## 步驟六：建議使用 /goal 自動推進、退場
 
-規劃完成後，告知使用者：
+規劃完成後（`tasks.md` 已列出具體任務，此時**尚未開始任何實作**），告知使用者：
 
-> 開發計畫已建立，進入實作階段。
-> 完成開發後，請手動呼叫 `/smart-commit` 執行 code review 與提交。
+> 開發計畫已建立，`tasks.md` 列出待完成任務，尚未開始實作。是否要使用 `/goal` 讓 Claude 自動跨多輪推進這些任務（依 TDD 紅綠燈流程），直到全部完成、測試與 lint 皆通過為止？
+>
+> 1. **是** — 請直接複製以下指令並手動輸入啟動（`/goal` 為 Claude Code 原生指令，須由使用者親自輸入才會生效，agent 無法代為觸發）：
+>    ```
+>    /goal 完成 openspec/changes/<change-id>/tasks.md 裡所有任務（依 TDD 紅綠燈流程），npm test 全數通過，且本次新增／修改的檔案 lint 無 error（不含既有 lint error）
+>    ```
+>    （`<change-id>` 請代入本次實際的 change 名稱；lint 條件務必限定在本次新增／修改的檔案，不可寫成整專案零 error——若專案本身已有既有、與本次無關的 lint error，寫成整專案零 error 會讓這個 goal 永遠無法達成，且 agent 無法自行執行 `/goal clear` 解除）
+> 2. **否** — 由使用者與 agent 在對話中逐項手動推進實作
 
-此 skill 退場，後續開發討論由使用者與 agent 自由進行，不受此 skill 約束。
+無論使用者選擇為何，最後都告知：
+
+> 完成開發（所有任務與測試皆通過）後，請手動呼叫 `/smart-commit` 執行 code review 與提交。
+
+此 skill 退場，後續實作與 TDD 推進（含 `/goal` 執行期間）由使用者與 agent 自由進行，不受此 skill 約束。
