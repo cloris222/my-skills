@@ -83,6 +83,14 @@ spec 草稿完成後，詢問使用者：
 - 每個功能單元先寫測試，測試通過才算完成
 - 呼叫 `superpowers:test-driven-development` 指導 TDD 流程執行
 
+若本次涉及 UI 實作（新增/修改畫面、元件），規劃前先確認專案內是否存在 UI 開發規範文件（例如 `reference-docs/ui-guidelines/` 或類似路徑）：
+
+- **有** → 規劃時 SHALL 將其核心原則內化到 `tasks.md` 的任務描述中（不呼叫 `ui-builder` skill，避免與本流程的主導權衝突）：
+  - UI 元件優先順序：共用元件 → UI 庫元件（如 Element Plus）→ utility class → scoped CSS → raw HTML，由上而下優先採用
+  - 開發前先搜尋專案既有共用元件／樣式，若已有相同或相似用途的元件，SHALL 優先重用或擴充，不重新開發相似樣式
+  - `tasks.md` 中涉及 UI 元件的任務，應註記「元件來源與理由」（沿用既有元件的名稱／新建的原因），供實作與 code review 時核對
+- **無** → 詢問使用者是否要透過 `setup-ui-guidelines` skill（問答問卷）建立一份專案專屬的 UI 開發規範文件；使用者同意則呼叫該 skill 建立後，回頭依上述「有」的做法納入原則；使用者婉拒則略過此步驟，直接依原有 TDD 規劃進行
+
 規劃前詢問使用者是否啟用 **Playwright 實機目視驗證**（可選步驟）：
 
 > 實作完成後，是否要以 Playwright 自動進行實機目視驗證（啟動 dev server、逐頁截圖比對）？
