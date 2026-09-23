@@ -41,7 +41,7 @@ Claude Code 的 skill 系統分為三層：
 | `page-dev-workflow` | 整合 openspec + TDD 規劃的頁面開發完整流程 | **手動**（需明確呼叫 `/page-dev-workflow`）|
 | `spec-sync` | 分析 git diff，判斷哪些改動需同步更新 openspec 規格文件 | **手動**（需明確呼叫 `/spec-sync`）|
 | `setup-ui-guidelines` | 問答問卷，為新專案生成客製化 `ui-guidelines` 規範文件集 | **手動**（需明確呼叫 `/setup-ui-guidelines`，新專案初始化時執行一次）|
-| `api-request-doc` | 產出交給後端的 API 需求文件：盤點 API 是否已存在、區分需求與參考、逐條查核來源 | 自動（說「請後端新增 API」「寫給後端的需求文件」即觸發）|
+| `api-request-doc` | 產出交給後端的 API 詢問文件：盤點 API 是否已存在、查證後詢問後端建議的處理方式、逐條查核來源 | 自動（說「請後端新增 API」「寫給後端的需求文件」即觸發）|
 
 ### Skills 之間的依賴關係
 
