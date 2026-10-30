@@ -85,18 +85,23 @@ setup-ui-guidelines
 | `code-simplifier` | 程式碼簡化 | `/simplify` |
 | `explanatory-output-style` | 教學型輸出模式 | 自動加入 Insight 說明區塊 |
 
-安裝指令（每行執行一次）：
+> ⚠️ Plugin 必須用 `claude plugin install` 安裝，**不能**用 `npx skills add`。
+> `npx skills add` 只會掃描 repo 內的 `SKILL.md`，而 plugin 可能只含指令、agent、hook 或 MCP 設定（例如 `context7` 只有 `.mcp.json`、`superpowers` 指向外部 repo），會出現「No matching skills found」或只裝到部分內容。
+
+安裝指令（每行執行一次；也可在 Claude Code 內改用 `/plugin install <name>@claude-plugins-official`）：
 
 ```bash
-npx skills add anthropics/claude-plugins-official@superpowers -g -y
-npx skills add anthropics/claude-plugins-official@code-review -g -y
-npx skills add anthropics/claude-plugins-official@claude-md-management -g -y
-npx skills add anthropics/claude-plugins-official@skill-creator -g -y
-npx skills add anthropics/claude-plugins-official@frontend-design -g -y
-npx skills add anthropics/claude-plugins-official@context7 -g -y
-npx skills add anthropics/claude-plugins-official@code-simplifier -g -y
-npx skills add anthropics/claude-plugins-official@explanatory-output-style -g -y
+claude plugin install superpowers@claude-plugins-official
+claude plugin install code-review@claude-plugins-official
+claude plugin install claude-md-management@claude-plugins-official
+claude plugin install skill-creator@claude-plugins-official
+claude plugin install frontend-design@claude-plugins-official
+claude plugin install context7@claude-plugins-official
+claude plugin install code-simplifier@claude-plugins-official
+claude plugin install explanatory-output-style@claude-plugins-official
 ```
+
+若提示找不到 `claude-plugins-official`，先執行 `claude plugin marketplace add anthropics/claude-plugins-official`。
 
 ---
 
@@ -106,10 +111,11 @@ npx skills add anthropics/claude-plugins-official@explanatory-output-style -g -y
 |--------|------|------|
 | `claude-reflect` v3.0.1 | `bayramannakov/claude-reflect` | 對話結束後反思並改善 skills |
 
-安裝指令：
+安裝指令（需先加入該 marketplace）：
 
 ```bash
-npx skills add bayramannakov/claude-reflect -g -y
+claude plugin marketplace add bayramannakov/claude-reflect
+claude plugin install claude-reflect@claude-reflect-marketplace
 ```
 
 ---
@@ -223,21 +229,24 @@ npm list -g openspec # 確認 openspec CLI 已安裝（若無：npm install -g o
 ### Step 2：安裝官方 Plugins
 
 ```bash
-npx skills add anthropics/claude-plugins-official@superpowers -g -y
-npx skills add anthropics/claude-plugins-official@code-review -g -y
-npx skills add anthropics/claude-plugins-official@claude-md-management -g -y
-npx skills add anthropics/claude-plugins-official@skill-creator -g -y
-npx skills add anthropics/claude-plugins-official@frontend-design -g -y
-npx skills add anthropics/claude-plugins-official@context7 -g -y
-npx skills add anthropics/claude-plugins-official@code-simplifier -g -y
-npx skills add anthropics/claude-plugins-official@explanatory-output-style -g -y
+claude plugin install superpowers@claude-plugins-official
+claude plugin install code-review@claude-plugins-official
+claude plugin install claude-md-management@claude-plugins-official
+claude plugin install skill-creator@claude-plugins-official
+claude plugin install frontend-design@claude-plugins-official
+claude plugin install context7@claude-plugins-official
+claude plugin install code-simplifier@claude-plugins-official
+claude plugin install explanatory-output-style@claude-plugins-official
 ```
 
 ### Step 3：安裝外部 Marketplace Plugin
 
 ```bash
-npx skills add bayramannakov/claude-reflect -g -y
+claude plugin marketplace add bayramannakov/claude-reflect
+claude plugin install claude-reflect@claude-reflect-marketplace
 ```
+
+安裝完 plugins 後需**重啟 Claude Code** 才會生效。
 
 ### Step 4：安裝個人 Skills（本 Repo）
 
